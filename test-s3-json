@@ -1,0 +1,39 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.1",
+      "eventSource": "aws:s3",
+      "awsRegion": "us-east-1",
+      "eventTime": "2023-03-24T03:32:00.357Z",
+      "eventName": "ObjectCreated:Put",
+      "userIdentity": {
+        "principalId": "AWS:AIDA33O7WP24QZTH7HLE2"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "1.2.3.4"
+      },  
+      "responseElements": {
+        "x-amz-request-id": "JD7QD6CQ2EJ9ATHM",
+        "x-amz-id-2": "6fKokbG8tzixY52vSldPJVil5fyK124Z6EnT4+WWdSR70gTUiZf4kJy/zEgTbvEp+dW21PJGeH2ejDLvwRykxPbfry/5W0FJ"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "5d6490f8-32fb-4ad6-b6bf-627186bceefd",
+        "bucket": {
+          "name": "test-ea-transcribe-123",
+          "ownerIdentity": {
+            "principalId": "A368M2ZV7IAM5E"
+          },  
+          "arn": "arn:aws:s3:::some-sample-bucket-for-transcriptions"
+        },  
+        "object": {
+          "key": "recording.mp4",
+          "size": 324981,
+          "eTag": "ee4475d78498e5243255e5b8ec1eb90f",
+          "sequencer": "00641D19ACB61C3D94"
+        }   
+      }   
+    }   
+  ]
+}  
+
