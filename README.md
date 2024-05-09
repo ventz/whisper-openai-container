@@ -6,6 +6,7 @@ In summary: it lets you transcribe voice to text *extremely* accurately and quic
 # How Do I use this?
 
 There are 2 ways to run/interact with this:
+
 * As a "regular container" (Docker)
 or
 * As an AWS Lambda (container backed) function - via an a direct API, or S3 "put" automation.
@@ -99,6 +100,17 @@ You can check when done with:
 while [ "$(aws lambda get-function --function-name transcribe | jq -r '.Configuration.LastUpdateStatus')" != "Successful" ]; do
     sleep 1
 done
+```
+
+# Works locally but not in AWS Lambda?
+
+The container has to be `amd64` due to the statically compiled ffmpeg
+being only amd64. This means you cannot use the ARM64 Lambdas.
+
+If you are building the container on a Mac M# series model and pushing to ECR, replace the 1st line in the Dockerfile with:
+
+```
+FROM --platform=linux/amd64 public.ecr.aws/lambda/python:3.12
 ```
 
 
