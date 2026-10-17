@@ -1,0 +1,24 @@
+{
+  "app": "uv run --frozen app.py",
+  "context": {
+    "stackName": "Whisper",
+    "bucketName": "",
+    "inputPrefix": "uploads/",
+    "outputPrefix": "transcripts/",
+    "model": "medium",
+    "architecture": "x86_64",
+    "memoryMb": 10240,
+    "ephemeralStorageMb": 4096,
+    "timeoutSeconds": 900,
+    "reservedConcurrency": 5,
+    "language": "",
+    "outputFormats": "txt,srt,vtt,json",
+    "maxInputMb": 1024,
+    "maxAudioSeconds": 3600,
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/aws-s3:createDefaultLoggingPolicy": true,
+    "@aws-cdk/aws-lambda:createNewPoliciesWithAddToRolePolicy": true
+  }
+}

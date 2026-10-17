@@ -1,0 +1,4 @@
+#!/bin/sh
+# Standalone CLI:
+#   docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/data" --entrypoint transcribe IMAGE /data/file.m4a
+exec python3 "${LAMBDA_TASK_ROOT:-/var/task}/transcriber.py" "$@"

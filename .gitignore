@@ -1,0 +1,39 @@
+# Local / private
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.claude/
+.mcp.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+private/
+.private/
+sessions/
+.sessions/
+*.session
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Infrastructure state and build output
+infra/cdk/cdk.out/
+infra/cdk/cdk.context.json
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Downloaded binaries and transcripts produced next to samples
+*.tar.xz
+samples/*.txt
+samples/*.srt
+samples/*.vtt
+samples/*.json

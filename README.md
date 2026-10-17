@@ -1,128 +1,108 @@
-# What is this?
-This is the OpenAI Whisper project (https://github.com/openai/whisper - Offline Speech Recognition model) - inside a Container, with an option to deploy as a stand-alone Docker container, or an AWS Lambda function that is container backed.
+# whisper-openai-container
 
-In summary: it lets you transcribe voice to text *extremely* accurately and quickly, for free.
+<p><strong>⭐ If whisper-openai-container is useful to you, please <a href="https://github.com/ventz/whisper-openai-container">star the repo</a>.</strong></p>
 
-# How Do I use this?
+<a href="https://github.com/ventz/whisper-openai-container/stargazers"><img src="https://img.shields.io/github/stars/ventz/whisper-openai-container?style=social" alt="GitHub stars"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+<img src="https://img.shields.io/badge/python-3.14-blue.svg" alt="Python 3.14">
 
-There are 2 ways to run/interact with this:
+Accurate, private speech-to-text with OpenAI's Whisper models, packaged as one container image. Run it on your own machine, or deploy it as an AWS Lambda function that transcribes every recording dropped into an S3 bucket. No per-minute fees, and the audio never leaves your machine or your AWS account.
 
-* As a "regular container" (Docker)
-or
-* As an AWS Lambda (container backed) function - via an a direct API, or S3 "put" automation.
+## Table of Contents
 
-## 1.) As a "regular container":
-```
-docker exec -it ventz/whisper /bin/bash"
-```
+- [Overview](#overview)
+- [Quick Install](#quick-install)
+- [Features](#features)
+- [Deploy to AWS: three ways](#deploy-to-aws-three-ways)
+- [Usage](#usage)
+- [Documentation](#documentation)
+- [Development](#development)
+- [License](#license)
 
-```
-# Assuming you have a 'recording.mp4' and have pulled it/mounted it on the container:
-whisper 'recording.mp4' --language English --model base --fp16 False
-```
+## Overview
 
+The image runs [faster-whisper](https://github.com/SYSTRAN/faster-whisper), a reimplementation of Whisper on the CTranslate2 engine that is about four times faster than OpenAI's original code on CPU while using the same models. The model is baked into the image when it is built, so transcription runs fully offline.
 
+The same image works two ways:
 
-## 2.) As an AWS Lambda (container backed) functions:
-The idea is that you will setup a S3 bucket with a hook that calls
-this Lambda when a new object is created or dropped.
+- **Locally**, as a command-line tool: point it at a file, get `.txt`, `.srt`, `.vtt` and `.json` next to it.
+- **On AWS Lambda**: upload to `s3://your-bucket/uploads/`, and the transcripts appear under `transcripts/`.
 
-This involves:
+## Quick Install
 
-a.) Tagging the local docker image and pushing it to ECR:
-```
-docker tag ventz/whisper:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/whisper:latest
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/whisper:latest
-```
+Requires Docker and `make`.
 
-b.) Deploying a new Lambda function from ECR:
-```
-aws lambda create-function --region us-east-1 --function-name transcribe \
-   --package-type Image  \
-   --code ImageUri=<ECR Image URI>   \
-   --role  arn:aws:iam::123456789012:role/service-role/transcribe
+```bash
+git clone https://github.com/ventz/whisper-openai-container
+cd whisper-openai-container
+make build
+make transcribe FILE=samples/recording.m4a
+cat samples/recording.m4a.txt
 ```
 
-NOTE: The role needs to have:
-i.) AWSLambdaBasicExecutionRole (for: 'logs:CreateLogStream', and 'logs:PutLogEvents')
-```
-{
-   "Version": "2012-10-17",
-   "Statement": [
-       {
-           "Effect": "Allow",
-           "Action": "logs:CreateLogGroup",
-           "Resource": "arn:aws:logs:us-east-1:123456789012:*"
-       },
-       {
-           "Effect": "Allow",
-           "Action": [
-               "logs:CreateLogStream",
-               "logs:PutLogEvents"
-           ],
-           "Resource": [
-               "arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/transcribe:*"
-           ]
-       }
-   ]
-}
+The first build downloads about 2 GB: the base image, the Python packages and the `medium` model.
+
+## Features
+
+- **Fast on CPU:** int8 inference with silence skipping (VAD). Uses a GPU when one is available ([GPU builds](docs/configuration.md#gpu)).
+- **Any audio or video file:** m4a, mp3, wav, flac, ogg, webm, mp4, mov, mkv and more, decoded by the FFmpeg bundled in PyAV.
+- **Four output formats:** plain text, SRT and WebVTT subtitles, and JSON with timed segments and the detected language.
+- **Any language:** auto-detected, or set with `WHISPER_LANGUAGE`.
+- **Choice of model:** `tiny` through `large-v3`, including `turbo`, picked at build time ([models](docs/configuration.md#choosing-a-model)).
+- **Event-driven on AWS:** prefix-filtered S3 trigger, least-privilege IAM, capped concurrency, no retries on bad input, and a failure queue ([how it works](docs/how-it-works.md)).
+- **Sandboxed locally:** `make transcribe` runs the container with no network, no capabilities and a read-only filesystem.
+- **Reproducible and verified builds:** base image pinned by digest, Python packages by hash, and models by commit and SHA-256.
+- **amd64 and arm64:** runs natively on Apple Silicon, and on Graviton Lambdas.
+
+## Deploy to AWS: three ways
+
+All three create the same setup: a private bucket, the function, an `uploads/` trigger, a least-privilege role and a failure queue. Pick the tool you already use.
+
+| Option | Best for | Command |
+|---|---|---|
+| **1. [AWS CDK](docs/deploy-cdk.md)** (recommended) | One command; CDK builds and pushes the image for you | `cd infra/cdk && cdk deploy` |
+| **2. [Terraform / OpenTofu](docs/deploy-terraform.md)** | Teams that already manage AWS with Terraform | `make tf-deploy` |
+| **3. [AWS CLI, step by step](docs/deploy-aws-cli.md)** | No infrastructure tool, or to see every resource | copy-paste commands |
+
+Then:
+
+```bash
+aws s3 cp meeting.m4a s3://YOUR-BUCKET/uploads/meeting.m4a
+aws s3 ls s3://YOUR-BUCKET/transcripts/          # meeting.m4a.txt, .srt, .vtt, .json
 ```
 
-and
+## Usage
 
-ii.) Write access to S3 bucket:
-```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:ListBucket"
-            ],
-            "Resource": "arn:aws:s3:::<YOUR BUCKET NAME>/*"
-        }
-    ]
-}
+```bash
+make transcribe FILE="$HOME/Downloads/my interview.mp3"        # all formats, next to the file
+make transcribe FILE=talk.m4a FORMATS=srt LANGUAGE=en          # subtitles only, skip detection
+make build MODEL=turbo                                         # rebuild with another model
+make shell                                                     # shell inside the image
+make help                                                      # every target
 ```
 
-c.) Update code if you ever re-configure/re-build your container/Dockerfile:
-```
-# NOTE: This assumes your function was deployed with the name 'transcribe' 
-aws lambda update-function-code --function-name transcribe --image-uri $(aws lambda get-function --function-name transcribe | jq -r '.Code.ImageUri')
+Without `make`:
+
+```bash
+docker build -t whisper container
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/data" --entrypoint transcribe whisper /data/talk.m4a --formats txt,srt
 ```
 
-You can check when done with:
-```
-while [ "$(aws lambda get-function --function-name transcribe | jq -r '.Configuration.LastUpdateStatus')" != "Successful" ]; do
-    sleep 1
-done
-```
+To test the Lambda handler locally against a real bucket, edit the bucket and key in [`events/s3-put.json`](events/s3-put.json), run `make lambda-local AWS_PROFILE=your-profile BUCKET=your-bucket` in one terminal and `make invoke` in another. The emulator only listens on 127.0.0.1 and has no authentication, so stop it when you're done.
 
-# Works locally but not in AWS Lambda?
+## Documentation
 
-The container has to be `amd64` due to the statically compiled ffmpeg
-being only amd64. This means you cannot use the ARM64 Lambdas.
+- [Configuration](docs/configuration.md): environment variables, models, limits and Lambda sizing, GPU, faster-whisper vs. openai-whisper, updating dependencies
+- [How it works](docs/how-it-works.md): the S3 flow and the security design
+- Deploy: [CDK](docs/deploy-cdk.md), [Terraform](docs/deploy-terraform.md), [AWS CLI](docs/deploy-aws-cli.md)
 
-If you are building the container on a Mac M# series model and pushing to ECR, replace the 1st line in the Dockerfile with:
+## Development
 
-```
-FROM --platform=linux/amd64 public.ecr.aws/lambda/python:3.12
+```bash
+make test      # unit tests (uv)
+make lint      # ruff and terraform fmt
 ```
 
+## License
 
-### MANUALLY TESTING THE LAMBDA LOCALLY (not within AWS): 
-```
-docker run -it --rm -d -p 9000:8080 --name whisper ventz/whisper
-```
-
-and then
-```
-curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d @test-s3-json
-```
-
-NOTE: This is a "fake" event just to make sure you can locally run
-the lambda. You will need a real s3 bucket and real file/recording + IAM permissions(see test-s3-json)
+[MIT](LICENSE) © Ventz Petkov

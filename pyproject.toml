@@ -1,0 +1,30 @@
+[project]
+name = "whisper-openai-container"
+version = "2.0.0"
+description = "faster-whisper speech-to-text as a Docker container or an S3-triggered AWS Lambda"
+requires-python = ">=3.12"
+license = "MIT"
+
+# Runtime dependencies are pinned with hashes in container/requirements.txt.
+# This file only exists for local tests and linting: `uv run pytest`.
+[dependency-groups]
+dev = [
+    "av",
+    "boto3",
+    "numpy",
+    "pytest",
+    "ruff",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["container", "tests"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "transcriber", "test_transcriber"]

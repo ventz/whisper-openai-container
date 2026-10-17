@@ -1,0 +1,8 @@
+*
+!requirements.txt
+!requirements-gpu.txt
+!fetch_model.py
+!models.lock.json
+!transcriber.py
+!app.py
+!transcribe
