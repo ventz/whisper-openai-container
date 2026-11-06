@@ -1,6 +1,6 @@
 # whisper-openai-container
 
-<p><strong>⭐ If whisper-openai-container is useful to you, please <a href="https://github.com/ventz/whisper-openai-container">star the repo</a>.</strong></p>
+<p><strong>⭐ If whisper-openai-container is useful to you, please star it: click the ☆ Star button at the top right of the <a href="https://github.com/ventz/whisper-openai-container">GitHub repo page</a>.</strong></p>
 
 <a href="https://github.com/ventz/whisper-openai-container/stargazers"><img src="https://img.shields.io/github/stars/ventz/whisper-openai-container?style=social" alt="GitHub stars"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
