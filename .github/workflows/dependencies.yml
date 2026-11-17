@@ -1,8 +1,9 @@
 name: Dependencies
 
-# The hash-locked container requirements are compiled with `uv pip compile`,
-# which Dependabot doesn't update. This job checks them weekly instead: it
-# fails when a pinned package has a known vulnerability or a newer release.
+# The hash-locked container requirements are compiled with `uv pip compile`.
+# Dependabot updates only some of those pins, so this job checks all of them
+# weekly: it fails when a pinned package has a known vulnerability or a newer
+# release.
 # To update, follow docs/configuration.md#updating-dependencies.
 
 on:
