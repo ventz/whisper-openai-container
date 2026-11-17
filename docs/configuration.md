@@ -33,17 +33,17 @@ The same variables work in the Lambda function and with the `transcribe` CLI (`d
 The model is downloaded and verified when the image is built, so the function never touches the network for it. Choose it with the `WHISPER_MODEL` build argument:
 
 ```bash
-make build MODEL=turbo                       # local
-make cdk-deploy MODEL=turbo                  # CDK
-make tf-deploy MODEL=turbo                   # Terraform
+make build MODEL=small                       # local
+make cdk-deploy MODEL=small                  # CDK
+make tf-deploy MODEL=small                   # Terraform
 ```
 
 | Model | Size | Notes |
 |---|---|---|
 | `tiny`, `base` | 75–145 MB | Fast, noticeably less accurate. Fine for clear, single-speaker English. |
 | `small` | 480 MB | Good speed/accuracy balance on CPU. |
-| `medium` | 1.5 GB | Default. Accurate across languages. |
-| `turbo` | 1.6 GB | large-v3-turbo: close to large-v3 accuracy at a fraction of its cost. |
+| `medium` | 1.5 GB | Accurate across languages, but about twice as slow as `turbo` on CPU. |
+| `turbo` | 1.6 GB | Default. large-v3-turbo, the newest Whisper model: close to large-v3 accuracy at a fraction of its cost. It transcribes only (no translation to English), which is all this project does. |
 | `large-v3` | 3.1 GB | Most accurate, slowest. Usually needs a GPU to be practical. |
 
 Measured locally on a 5.4-minute English interview (Apple M3, 12 CPU cores, arm64 image, int8): `small` 160 s, `turbo` 224 s, `medium` about 430 s. `turbo` and `medium` produced equally accurate transcripts; `turbo` also caught a few words `medium` dropped. Lambda's x86_64 vCPUs will differ, so time your own recordings.
@@ -79,7 +79,7 @@ Version 2 switched from [openai-whisper](https://github.com/openai/whisper) to [
 |---|---|---|
 | Speed on CPU | Baseline | About 4x faster (int8) |
 | Memory | Baseline | About half |
-| Image size | Several GB of PyTorch and CUDA libraries, plus the model | About 380 MB of Python packages plus the model (1.75 GB compressed with `medium`) |
+| Image size | Several GB of PyTorch and CUDA libraries, plus the model | About 380 MB of Python packages plus the model (about 1.8 GB compressed with `turbo`) |
 | ffmpeg | Separate static binary, downloaded at build | Bundled in PyAV; no separate binary |
 | Accuracy | Reference | Same models; int8 differences are negligible in practice |
 | Extras | | Built-in VAD silence filtering, word timestamps, batched GPU inference |
@@ -88,7 +88,7 @@ Version 2 switched from [openai-whisper](https://github.com/openai/whisper) to [
 
 ## Updating dependencies
 
-Everything is pinned: the base image by digest, Python packages by hash, and models by commit and hash. To move to the newest versions:
+Everything is pinned: the base image by digest, Python packages by hash, and models by commit and hash. Dependabot opens pull requests for the GitHub Actions, the base image digest, the dev and CDK `uv.lock` files and the Terraform provider. It can't update the hash-locked `container/requirements*.txt`, so the weekly [Dependencies workflow](../.github/workflows/dependencies.yml) checks them with `pip-audit` and fails when a pin has a known vulnerability or a newer release. To update them:
 
 ```bash
 cd container

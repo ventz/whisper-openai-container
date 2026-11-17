@@ -1,7 +1,7 @@
 """CDK app: S3 bucket + container-image Lambda that transcribes uploads.
 
 Settings come from cdk.json "context" and can be overridden per deploy:
-    cdk deploy -c model=turbo -c architecture=arm64
+    cdk deploy -c model=small -c architecture=arm64
 """
 
 from pathlib import Path

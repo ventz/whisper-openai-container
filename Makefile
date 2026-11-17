@@ -1,11 +1,11 @@
 # Common tasks. Override any variable on the command line, for example:
-#   make build MODEL=turbo
+#   make build MODEL=small
 #   make transcribe FILE=$HOME/Downloads/meeting.m4a FORMATS=txt,srt
 
 SHELL := /bin/bash
 
 IMAGE     ?= whisper
-MODEL     ?= medium
+MODEL     ?= turbo
 # Local builds default to this machine's architecture.
 PLATFORM  ?= $(if $(filter arm64 aarch64,$(shell uname -m)),linux/arm64,linux/amd64)
 GPU       ?= false

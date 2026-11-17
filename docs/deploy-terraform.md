@@ -45,7 +45,7 @@ language             = "en"
 reserved_concurrency = 5
 ```
 
-The model is chosen at build time: `make tf-deploy MODEL=turbo`. `make tf-deploy` passes `-var` only for the Makefile variables you set on its command line (`AWS_REGION=` → `region`, `ARCH=` → `architecture`, `TAG=` → `image_tag`, and `REPO=` → `name`, which names the function, role, queue and default bucket as well as the repository), so `terraform.tfvars` keeps working. It reads the repository, region, architecture and tag back from Terraform when it pushes.
+The model is chosen at build time: `make tf-deploy MODEL=small`. `make tf-deploy` passes `-var` only for the Makefile variables you set on its command line (`AWS_REGION=` → `region`, `ARCH=` → `architecture`, `TAG=` → `image_tag`, and `REPO=` → `name`, which names the function, role, queue and default bucket as well as the repository), so `terraform.tfvars` keeps working. It reads the repository, region, architecture and tag back from Terraform when it pushes.
 
 ## State
 

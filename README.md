@@ -3,6 +3,7 @@
 <p><strong>⭐ If whisper-openai-container is useful to you, please star it: click the ☆ Star button at the top right of the <a href="https://github.com/ventz/whisper-openai-container">GitHub repo page</a>.</strong></p>
 
 <a href="https://github.com/ventz/whisper-openai-container/stargazers"><img src="https://img.shields.io/github/stars/ventz/whisper-openai-container?style=social" alt="GitHub stars"></a>
+<a href="https://github.com/ventz/whisper-openai-container/actions/workflows/ci.yml"><img src="https://github.com/ventz/whisper-openai-container/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 <img src="https://img.shields.io/badge/python-3.14-blue.svg" alt="Python 3.14">
 
@@ -40,7 +41,7 @@ make transcribe FILE=samples/recording.m4a
 cat samples/recording.m4a.txt
 ```
 
-The first build downloads about 2 GB: the base image, the Python packages and the `medium` model.
+The first build downloads about 2 GB: the base image, the Python packages and the `turbo` model (large-v3-turbo).
 
 ## Features
 
@@ -76,7 +77,7 @@ aws s3 ls s3://YOUR-BUCKET/transcripts/          # meeting.m4a.txt, .srt, .vtt, 
 ```bash
 make transcribe FILE="$HOME/Downloads/my interview.mp3"        # all formats, next to the file
 make transcribe FILE=talk.m4a FORMATS=srt LANGUAGE=en          # subtitles only, skip detection
-make build MODEL=turbo                                         # rebuild with another model
+make build MODEL=small                                         # rebuild with another model
 make shell                                                     # shell inside the image
 make help                                                      # every target
 ```
@@ -102,6 +103,8 @@ To test the Lambda handler locally against a real bucket, edit the bucket and ke
 make test      # unit tests (uv)
 make lint      # ruff and terraform fmt
 ```
+
+CI runs the same checks on every push and pull request, plus Terraform validation, a CDK synth, and an image build that transcribes the sample. Dependabot and a weekly job keep the pinned dependencies current ([details](docs/configuration.md#updating-dependencies)).
 
 ## License
 

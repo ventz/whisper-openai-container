@@ -5,7 +5,7 @@
     "bucketName": "",
     "inputPrefix": "uploads/",
     "outputPrefix": "transcripts/",
-    "model": "medium",
+    "model": "turbo",
     "architecture": "x86_64",
     "memoryMb": 10240,
     "ephemeralStorageMb": 4096,

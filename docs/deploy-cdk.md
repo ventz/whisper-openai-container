@@ -47,14 +47,14 @@ aws s3 cp "s3://$BUCKET/transcripts/recording.m4a.txt" -
 Every setting lives in the `context` block of [`infra/cdk/cdk.json`](../infra/cdk/cdk.json). Edit it, or override per deploy with `-c`:
 
 ```bash
-cdk deploy -c model=turbo -c architecture=arm64 -c language=en -c reservedConcurrency=10
+cdk deploy -c model=small -c architecture=arm64 -c language=en -c reservedConcurrency=10
 ```
 
 | Context key | Default | Notes |
 |---|---|---|
 | `stackName` | `Whisper` | Use different names to deploy several copies. |
 | `bucketName` | *(generated)* | Set a name to choose it yourself. |
-| `model` | `medium` | Any name in `container/models.lock.json`. |
+| `model` | `turbo` | Any name in `container/models.lock.json`. |
 | `architecture` | `x86_64` | `arm64` (Graviton) is about 20% cheaper per GB-second. On an Apple Silicon Mac an `x86_64` image is built under emulation, which is slower to build. |
 | `memoryMb`, `timeoutSeconds`, `ephemeralStorageMb` | `10240`, `900`, `4096` | See [Limits and Lambda sizing](configuration.md#limits-and-lambda-sizing). |
 | `reservedConcurrency` | `5` | Caps parallel runs and cost. `""` means no cap; see [Concurrency](configuration.md#limits-and-lambda-sizing). |

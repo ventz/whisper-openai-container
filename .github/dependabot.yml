@@ -1,0 +1,40 @@
+# container/requirements*.txt are checked by .github/workflows/dependencies.yml.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Wait a week before proposing a release, so a hijacked one is usually pulled first.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # The Lambda base image, pinned by digest.
+  - package-ecosystem: docker
+    directory: /container
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: uv
+    directories:
+      - /
+      - /infra/cdk
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directory: /infra/terraform
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

@@ -46,7 +46,7 @@ aws ecr put-lifecycle-policy --repository-name "$NAME" --lifecycle-policy-text '
   "rulePriority": 1, "description": "Expire untagged images beyond the newest 10",
   "selection": {"tagStatus": "untagged", "countType": "imageCountMoreThan", "countNumber": 10},
   "action": {"type": "expire"}}]}'
-make push REPO="$NAME"            # add ARCH=arm64 for Graviton, MODEL=turbo for another model
+make push REPO="$NAME"            # add ARCH=arm64 for Graviton, MODEL=small for another model
 IMAGE=$ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$NAME:latest
 ```
 

@@ -1,0 +1,55 @@
+name: Dependencies
+
+# The hash-locked container requirements are compiled with `uv pip compile`,
+# which Dependabot doesn't update. This job checks them weekly instead: it
+# fails when a pinned package has a known vulnerability or a newer release.
+# To update, follow docs/configuration.md#updating-dependencies.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  requirements:
+    name: Container requirements
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.7"
+          enable-cache: false
+
+      - name: Known vulnerabilities
+        working-directory: container
+        run: |
+          uvx pip-audit==2.10.1 --disable-pip --require-hashes -r requirements.txt
+          uvx pip-audit==2.10.1 --disable-pip --require-hashes -r requirements-gpu.txt
+
+      - name: Newer releases
+        if: ${{ !cancelled() }}
+        working-directory: container
+        run: |
+          uv pip compile -q -U --no-build requirements.in --universal --generate-hashes --python-version 3.14 \
+            -o "$RUNNER_TEMP/requirements.txt"
+          uv pip compile -q -U --no-build requirements-gpu.in --generate-hashes --python-version 3.14 \
+            --python-platform x86_64-manylinux_2_28 -o "$RUNNER_TEMP/requirements-gpu.txt"
+          pins() { grep -E '^[a-z0-9]' "$1" | sort; }
+          status=0
+          for f in requirements.txt requirements-gpu.txt; do
+            if ! diff <(pins "$f") <(pins "$RUNNER_TEMP/$f"); then
+              echo "::warning file=container/$f::newer pinned versions are available"
+              status=1
+            fi
+          done
+          exit $status
