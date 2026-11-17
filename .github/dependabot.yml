@@ -12,13 +12,18 @@ updates:
       actions:
         patterns: ["*"]
 
-  # The Lambda base image, pinned by digest.
+  # The Lambda base image, pinned by digest. Only digest updates: a new Python
+  # version needs container/requirements*.txt recompiled for it, so that is
+  # done by hand.
   - package-ecosystem: docker
     directory: /container
     schedule:
       interval: weekly
     cooldown:
       default-days: 7
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: uv
     directories:
