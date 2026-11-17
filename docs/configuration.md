@@ -92,8 +92,10 @@ Everything is pinned: the base image by digest, Python packages by hash, and mod
 
 ```bash
 cd container
-uv pip compile -U requirements.in --universal --generate-hashes --python-version 3.14 -o requirements.txt
-uv pip compile -U requirements-gpu.in --generate-hashes --python-version 3.14 \
+# Skip releases from the last 7 days (macOS date; on Linux: date -u -d '7 days ago' +%FT%TZ).
+export UV_EXCLUDE_NEWER="$(date -u -v-7d +%FT%TZ)"
+uv pip compile -U --no-build requirements.in --universal --generate-hashes --python-version 3.14 -o requirements.txt
+uv pip compile -U --no-build requirements-gpu.in --generate-hashes --python-version 3.14 \
     --python-platform x86_64-manylinux_2_28 -o requirements-gpu.txt
 docker buildx imagetools inspect public.ecr.aws/lambda/python:3.14   # new digest for the Dockerfile FROM line
 ```

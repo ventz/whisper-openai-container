@@ -37,10 +37,14 @@ jobs:
           uvx pip-audit==2.10.1 --disable-pip --require-hashes -r requirements.txt
           uvx pip-audit==2.10.1 --disable-pip --require-hashes -r requirements-gpu.txt
 
+      # Only releases at least 7 days old count, matching Dependabot's cooldown,
+      # so the job doesn't fail on a release that is too new to take.
       - name: Newer releases
         if: ${{ !cancelled() }}
         working-directory: container
         run: |
+          UV_EXCLUDE_NEWER="$(date -u -d '7 days ago' +%FT%TZ)"
+          export UV_EXCLUDE_NEWER
           uv pip compile -q -U --no-build requirements.in --universal --generate-hashes --python-version 3.14 \
             -o "$RUNNER_TEMP/requirements.txt"
           uv pip compile -q -U --no-build requirements-gpu.in --generate-hashes --python-version 3.14 \
@@ -49,7 +53,7 @@ jobs:
           status=0
           for f in requirements.txt requirements-gpu.txt; do
             if ! diff <(pins "$f") <(pins "$RUNNER_TEMP/$f"); then
-              echo "::warning file=container/$f::newer pinned versions are available"
+              echo "::warning file=container/$f::releases older than $UV_EXCLUDE_NEWER are available"
               status=1
             fi
           done
