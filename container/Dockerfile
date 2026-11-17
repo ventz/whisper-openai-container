@@ -1,6 +1,6 @@
 # AWS Lambda Python base image, pinned by multi-arch digest (amd64 + arm64).
 # Bump with: docker buildx imagetools inspect public.ecr.aws/lambda/python:3.14
-FROM public.ecr.aws/lambda/python:3.14@sha256:cf4c3a72d1cd34b7ae289fef868bac0777afeef9895c5d0a3d83d7dcb4da9a29
+FROM public.ecr.aws/lambda/python:3.14@sha256:6a21791117a382e708a6f53fdd5c0f693209ca3fb3af3d10e3fa1c265f778395
 
 # Model baked into the image; one of the names in models.lock.json.
 ARG WHISPER_MODEL=turbo
