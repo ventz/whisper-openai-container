@@ -88,7 +88,7 @@ Version 2 switched from [openai-whisper](https://github.com/openai/whisper) to [
 
 ## Updating dependencies
 
-Everything is pinned: the base image by digest, Python packages by hash, and models by commit and hash. Dependabot opens pull requests for the GitHub Actions, the base image digest, the dev and CDK `uv.lock` files and the Terraform provider. It can't update the hash-locked `container/requirements*.txt`, so the weekly [Dependencies workflow](../.github/workflows/dependencies.yml) checks them with `pip-audit` and fails when a pin has a known vulnerability or a newer release. To update them:
+Everything is pinned: the base image by digest, Python packages by hash, and models by commit and hash. Dependabot opens pull requests for the GitHub Actions, the base image digest, the dev `uv.lock`, `aws-cdk-lib` together with the CDK CLI (one pull request, so they stay compatible) and the Terraform provider. It can't update the hash-locked `container/requirements*.txt`, so the weekly [Dependencies workflow](../.github/workflows/dependencies.yml) checks them with `pip-audit` and fails when a pin has a known vulnerability or a newer release. To update them:
 
 ```bash
 cd container

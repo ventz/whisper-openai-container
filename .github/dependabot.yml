@@ -1,5 +1,11 @@
 # container/requirements*.txt are checked by .github/workflows/dependencies.yml.
 version: 2
+
+multi-ecosystem-groups:
+  cdk:
+    schedule:
+      interval: weekly
+
 updates:
   - package-ecosystem: github-actions
     directory: /
@@ -25,10 +31,9 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
+  # Dev tools: pytest, ruff and the test-only copies of av and boto3.
   - package-ecosystem: uv
-    directories:
-      - /
-      - /infra/cdk
+    directory: /
     schedule:
       interval: weekly
     cooldown:
@@ -36,6 +41,22 @@ updates:
     groups:
       python:
         patterns: ["*"]
+
+  # aws-cdk-lib (uv) and the CDK CLI (npm) are updated in one pull request: a
+  # new aws-cdk-lib often needs a new CLI, and either one alone fails synth.
+  - package-ecosystem: uv
+    directory: /infra/cdk
+    patterns: ["*"]
+    multi-ecosystem-group: cdk
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: npm
+    directory: /infra/cdk
+    patterns: ["*"]
+    multi-ecosystem-group: cdk
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: terraform
     directory: /infra/terraform

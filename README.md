@@ -61,7 +61,7 @@ All three create the same setup: a private bucket, the function, an `uploads/` t
 
 | Option | Best for | Command |
 |---|---|---|
-| **1. [AWS CDK](docs/deploy-cdk.md)** (recommended) | One command; CDK builds and pushes the image for you | `cd infra/cdk && cdk deploy` |
+| **1. [AWS CDK](docs/deploy-cdk.md)** (recommended) | One command; CDK builds and pushes the image for you | `make cdk-deploy` |
 | **2. [Terraform / OpenTofu](docs/deploy-terraform.md)** | Teams that already manage AWS with Terraform | `make tf-deploy` |
 | **3. [AWS CLI, step by step](docs/deploy-aws-cli.md)** | No infrastructure tool, or to see every resource | copy-paste commands |
 

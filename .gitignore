@@ -37,3 +37,6 @@ samples/*.txt
 samples/*.srt
 samples/*.vtt
 samples/*.json
+
+# CDK CLI installed from infra/cdk/package-lock.json
+node_modules/

@@ -1,0 +1,8 @@
+{
+  "name": "whisper-cdk",
+  "private": true,
+  "description": "Pins the CDK CLI used with this app; aws-cdk-lib is pinned in pyproject.toml.",
+  "devDependencies": {
+    "aws-cdk": "2.1148.1"
+  }
+}

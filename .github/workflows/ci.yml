@@ -56,7 +56,9 @@ jobs:
       # deployed, and no AWS credentials are available.
       - name: Synthesize CDK app
         working-directory: infra/cdk
-        run: npx --yes aws-cdk@2.1129.0 synth --quiet
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx --no-install cdk synth --quiet
 
   image:
     name: Image build and smoke test

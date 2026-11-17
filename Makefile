@@ -30,7 +30,7 @@ TAG        ?= latest
 given = $(filter command line,$(origin $(1)))
 
 .PHONY: help build shell transcribe lambda-local invoke test lint \
-        push update-function cdk-deploy tf-deploy
+        push update-function cdk-install cdk-deploy tf-deploy
 
 help: ## Show targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -98,10 +98,17 @@ update-function: push ## AWS CLI path: push, then point FUNCTION at the new imag
 		--image-uri $(REGISTRY)/$(REPO):$(TAG) --query LastUpdateStatus --output text
 	aws lambda wait function-updated-v2 --region $(AWS_REGION) --function-name $(FUNCTION)
 
+# The CDK CLI comes from infra/cdk/package-lock.json, so it always matches the
+# aws-cdk-lib version in uv.lock.
+CDK = npx --no-install cdk
+
+cdk-install:
+	cd infra/cdk && npm ci --ignore-scripts --no-audit --no-fund
+
 # No build attestations: Lambda rejects image indexes that carry them.
 cdk-deploy: export BUILDX_NO_DEFAULT_ATTESTATIONS = 1
-cdk-deploy: ## CDK path: build, push and deploy everything
-	cd infra/cdk && $(if $(call given,AWS_REGION),AWS_REGION=$(AWS_REGION)) cdk deploy \
+cdk-deploy: cdk-install ## CDK path: build, push and deploy everything
+	cd infra/cdk && $(if $(call given,AWS_REGION),AWS_REGION=$(AWS_REGION)) $(CDK) deploy \
 		$(if $(call given,MODEL),-c model=$(MODEL)) $(if $(call given,ARCH),-c architecture=$(ARCH))
 
 # TERRAFORM=tofu for OpenTofu.

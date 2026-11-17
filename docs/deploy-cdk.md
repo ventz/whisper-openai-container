@@ -12,17 +12,19 @@ One command builds the image, pushes it to ECR and creates the whole stack:
 ## Requirements
 
 - AWS credentials for the target account (`aws sts get-caller-identity` works)
-- Docker, [uv](https://docs.astral.sh/uv/) and the CDK CLI (`npm install -g aws-cdk`)
-- A bootstrapped account and region (once per account/region): `cdk bootstrap`
+- Docker, [uv](https://docs.astral.sh/uv/) and Node.js (for `npm`)
+- The CDK CLI, pinned in [`infra/cdk/package.json`](../infra/cdk/package.json) to a version that matches `aws-cdk-lib`: `cd infra/cdk && npm ci`. The commands below run it with `npx cdk`. A global `cdk` works too if it is at least as new; an older one fails with "Cloud assembly schema version mismatch".
+- A bootstrapped account and region (once per account/region): `npx cdk bootstrap`
 
 ## Deploy
 
 ```bash
 cd infra/cdk
-BUILDX_NO_DEFAULT_ATTESTATIONS=1 cdk deploy
+npm ci
+BUILDX_NO_DEFAULT_ATTESTATIONS=1 npx cdk deploy
 ```
 
-`BUILDX_NO_DEFAULT_ATTESTATIONS=1` stops Docker from attaching build attestations, which turn the image into an index that Lambda rejects. `make cdk-deploy` from the repository root sets it for you.
+`BUILDX_NO_DEFAULT_ATTESTATIONS=1` stops Docker from attaching build attestations, which turn the image into an index that Lambda rejects. `make cdk-deploy` from the repository root sets it for you, and runs `npm ci` first.
 
 The outputs show where to upload:
 
@@ -47,7 +49,7 @@ aws s3 cp "s3://$BUCKET/transcripts/recording.m4a.txt" -
 Every setting lives in the `context` block of [`infra/cdk/cdk.json`](../infra/cdk/cdk.json). Edit it, or override per deploy with `-c`:
 
 ```bash
-cdk deploy -c model=small -c architecture=arm64 -c language=en -c reservedConcurrency=10
+npx cdk deploy -c model=small -c architecture=arm64 -c language=en -c reservedConcurrency=10
 ```
 
 | Context key | Default | Notes |
@@ -63,6 +65,6 @@ cdk deploy -c model=small -c architecture=arm64 -c language=en -c reservedConcur
 
 ## Update and remove
 
-Re-run `cdk deploy` (or `make cdk-deploy` from the repository root) after changing code or settings; CDK rebuilds the image only when its files change. `make cdk-deploy` passes `-c` flags only for variables you set on its command line (`MODEL=`, `ARCH=`), so values in `cdk.json` are kept.
+Re-run `npx cdk deploy` (or `make cdk-deploy` from the repository root) after changing code or settings; CDK rebuilds the image only when its files change. `make cdk-deploy` passes `-c` flags only for variables you set on its command line (`MODEL=`, `ARCH=`), so values in `cdk.json` are kept.
 
-`cdk destroy` removes everything except the bucket, which is kept (with your recordings and transcripts) on purpose. Empty and delete it yourself when you no longer need it.
+`npx cdk destroy` removes everything except the bucket, which is kept (with your recordings and transcripts) on purpose. Empty and delete it yourself when you no longer need it.
