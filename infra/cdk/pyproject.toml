@@ -3,7 +3,7 @@ name = "whisper-cdk"
 version = "2.0.0"
 requires-python = ">=3.12"
 dependencies = [
-    "aws-cdk-lib==2.275.0",
+    "aws-cdk-lib==2.277.0",
     "constructs==10.8.1",
 ]
 
